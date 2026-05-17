@@ -4,7 +4,7 @@ import confetti from 'canvas-confetti';
 import { CATALOG, TEAMS } from '../data/catalog.js';
 import { db } from '../db/index.js';
 import { useAppStore } from '../store/useAppStore.js';
-import { getTeamProgress, registerSticker, TEAM_ORDER } from '../modules/storage/collectionService.js';
+import { getTeamProgress, registerSticker, unregisterSticker, TEAM_ORDER } from '../modules/storage/collectionService.js';
 import { TEAM_FLAGS } from '../utils/teamConfig.js';
 import { Check, Copy, Star } from 'lucide-react';
 
@@ -61,11 +61,13 @@ export default function TeamPage() {
 
   // Pointer-based Gestures (Swipe & Long Press)
   const [pointerStart, setPointerStart] = useState(null);
+  const lastTapRef = useRef({ time: 0, code: null });
   const minSwipeDistance = 60;
   const longPressDelay = 500; // Slightly faster
   const moveThreshold = 20; // More forgiving for "shaky" long presses
 
   const onPointerDown = (e, stickerCode = null) => {
+    e.stopPropagation();
     const startX = e.clientX;
     const startY = e.clientY;
     setPointerStart({ x: startX, y: startY, time: Date.now(), stickerCode });
@@ -80,6 +82,7 @@ export default function TeamPage() {
   };
 
   const onPointerUp = (e) => {
+    e.stopPropagation();
     if (!pointerStart) return;
     
     const deltaX = e.clientX - pointerStart.x;
@@ -99,12 +102,31 @@ export default function TeamPage() {
       } else if (deltaX > 0 && currentIndex > 0) {
         navigate(`/team/${TEAM_ORDER[currentIndex - 1]}`);
       }
+    } else if (Math.abs(deltaX) < 30 && Math.abs(deltaY) < 30 && duration < 400 && pointerStart.stickerCode) {
+      const code = pointerStart.stickerCode;
+      const now = Date.now();
+      if (lastTapRef.current.code === code && (now - lastTapRef.current.time) < 500) {
+        lastTapRef.current = { time: 0, code: null }; // reset
+        handleDoubleTap(code);
+      } else {
+        lastTapRef.current = { time: now, code };
+      }
     }
     
     setPointerStart(null);
   };
 
+  const handleDoubleTap = async (stickerCode) => {
+    const entry = ownedMap[stickerCode];
+    if (entry && entry.count > 0) {
+      if ('vibrate' in navigator) navigator.vibrate(30);
+      await unregisterSticker(stickerCode);
+      triggerRefresh();
+    }
+  };
+
   const onPointerMove = (e) => {
+    e.stopPropagation();
     if (!pointerStart) return;
     
     const deltaX = Math.abs(e.clientX - pointerStart.x);
@@ -220,7 +242,7 @@ export default function TeamPage() {
                 <div className="absolute top-1.5 right-1.5">
                   {isDuplicate ? (
                     <div className="bg-warning text-warning-bg text-[9px] font-black px-1.5 py-0.5 rounded-full">
-                      {entry.count}
+                      {entry.count - 1}
                     </div>
                   ) : (
                     !isSpecial && <Check className="text-success" size={10} strokeWidth={4} />

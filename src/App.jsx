@@ -17,6 +17,7 @@ function Header() {
   
   const isTeamPage = location.pathname.startsWith('/team/');
   const isScanPage = location.pathname === '/scan';
+  const isDuplicatesPage = location.pathname === '/duplicates';
   const showBack = isTeamPage || isScanPage;
 
   const getTitle = () => {
@@ -56,7 +57,7 @@ function Header() {
           Escanear
         </button>
       </div>
-      {!isScanPage && (
+      {!isScanPage && !isDuplicatesPage && (
         <div className="relative">
           <Search />
         </div>

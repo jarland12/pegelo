@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Copy, Star } from 'lucide-react';
 import ProgressCard from '../components/ProgressCard.jsx';
@@ -46,7 +46,7 @@ export default function HomePage() {
                 <span className={`text-[13px] font-semibold ${
                   item.count > 1 ? 'text-warning' : 'text-success'
                 }`}>
-                  {item.count > 1 ? `×${item.count}` : 'Nueva ✓'}
+                  {item.count > 1 ? `×${item.count - 1}` : 'Nueva ✓'}
                 </span>
               </div>
             ))}

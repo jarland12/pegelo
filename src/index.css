@@ -163,3 +163,11 @@ body {
 .foil-owned-wrapper > div {
   border: 2px solid #d4a843 !important;
 }
+
+
+/* Block landscape mode for PWA */
+@media screen and (orientation: landscape) {
+  body {
+    display: none;
+  }
+}
