@@ -81,7 +81,7 @@ export default function DuplicatesPage() {
 
     try {
       const shareText = generateShareText(duplicates);
-      
+
       if (navigator.share) {
         await navigator.share({
           title: 'Láminas repetidas para intercambiar - Álbum 2026',
@@ -103,7 +103,7 @@ export default function DuplicatesPage() {
 
     try {
       const shareText = generateMissingText(missingByTeam);
-      
+
       if (navigator.share) {
         await navigator.share({
           title: 'Láminas que me faltan - Álbum 2026',
@@ -123,24 +123,30 @@ export default function DuplicatesPage() {
   const generateShareText = (duplicatesList) => {
     let text = '¡Hola! Tengo estas láminas repetidas para intercambiar en el Álbum 2026:\n\n';
 
-    const maxToShow = 10;
-    const duplicatesToShow = duplicatesList.slice(0, maxToShow);
-    const remainingCount = duplicatesList.length - maxToShow;
-
-    duplicatesToShow.forEach(dup => {
-      if (dup.teamCode === 'CC') {
-        text += `${dup.code} ${dup.player} (Coca-Cola) ×${dup.count - 1}\n`;
-      } else {
-        const teamName = TEAM_FLAGS[dup.teamCode] || dup.teamCode;
-        text += `${dup.code} ${teamName} ×${dup.count - 1}\n`;
-      }
+    const byTeam = {};
+    duplicatesList.forEach(dup => {
+      if (!byTeam[dup.teamCode]) byTeam[dup.teamCode] = [];
+      byTeam[dup.teamCode].push(dup);
     });
 
-    if (remainingCount > 0) {
-      text += `...y ${remainingCount} más\n\n`;
-    } else {
-      text += '\n';
-    }
+    TEAM_ORDER.forEach(teamCode => {
+      if (byTeam[teamCode] && byTeam[teamCode].length > 0) {
+        if (teamCode === 'CC') {
+          text += `Coca-Cola\n`;
+          byTeam[teamCode].forEach(dup => {
+            text += `${dup.code} ${dup.player} ×${dup.count - 1}\n`;
+          });
+          text += '\n';
+        } else {
+          const flag = TEAM_FLAGS[teamCode] || '';
+          text += `${flag} ${teamCode}\n`;
+          byTeam[teamCode].forEach(dup => {
+            text += `${dup.code} ${dup.player} ×${dup.count - 1}\n`;
+          });
+          text += '\n';
+        }
+      }
+    });
 
     text += '¿Te interesan algunas para intercambiar? #Álbum2026 #Intercambio';
 
@@ -150,30 +156,24 @@ export default function DuplicatesPage() {
   const generateMissingText = (missingByTeamObj) => {
     let text = '¡Hola! Me faltan estas láminas del Álbum 2026:\n\n';
 
-    const maxToShow = 15;
-    let shown = 0;
-    const allTeamCodes = Object.keys(missingByTeamObj);
-
-    for (const teamCode of allTeamCodes) {
-      const missing = missingByTeamObj[teamCode];
-      for (const sticker of missing) {
-        if (shown >= maxToShow) break;
-        if (sticker.teamCode === 'CC') {
-          text += `${sticker.code} ${sticker.player} (Coca-Cola)\n`;
+    TEAM_ORDER.forEach(teamCode => {
+      if (missingByTeamObj[teamCode] && missingByTeamObj[teamCode].length > 0) {
+        if (teamCode === 'CC') {
+          text += `Coca-Cola\n`;
+          missingByTeamObj[teamCode].forEach(sticker => {
+            text += `${sticker.code} ${sticker.player}\n`;
+          });
+          text += '\n';
         } else {
-          text += `${sticker.code} ${TEAM_FLAGS[teamCode] || teamCode}\n`;
+          const flag = TEAM_FLAGS[teamCode] || '';
+          text += `${flag} ${teamCode}\n`;
+          missingByTeamObj[teamCode].forEach(sticker => {
+            text += `${sticker.code} ${sticker.player}\n`;
+          });
+          text += '\n';
         }
-        shown++;
       }
-      if (shown >= maxToShow) break;
-    }
-
-    const remainingCount = totalMissing - maxToShow;
-    if (remainingCount > 0) {
-      text += `...y ${remainingCount} más\n\n`;
-    } else {
-      text += '\n';
-    }
+    });
 
     text += '¿Tienes alguna para intercambiar? #Álbum2026 #Intercambio';
 
@@ -183,14 +183,14 @@ export default function DuplicatesPage() {
   return (
     <div className="space-y-6 pb-20">
       <div className="flex border-b border-border pb-1">
-        <button 
+        <button
           onClick={() => { setActiveTab('repetidas'); setSearchQuery(''); }}
           className={`flex-1 text-center py-2 font-medium 
             ${activeTab === 'repetidas' ? 'text-primary border-b-2 border-primary' : 'text-muted'}`}
         >
           Repetidas
         </button>
-        <button 
+        <button
           onClick={() => { setActiveTab('faltan'); setSearchQuery(''); }}
           className={`flex-1 text-center py-2 font-medium 
             ${activeTab === 'faltan' ? 'text-primary border-b-2 border-primary' : 'text-muted'}`}
@@ -200,14 +200,14 @@ export default function DuplicatesPage() {
       </div>
 
       <div className="flex justify-between items-center mb-2.5 px-1">
-        <h2 
+        <h2
           className="text-[13px] font-normal text-muted"
           style={{ fontSize: '13px', color: '#8b8b8f' }}
         >
           {activeTab === 'repetidas' ? `${totalDups} repetidas` : `${totalMissing} faltantes`}
         </h2>
         {activeTab === 'repetidas' && (
-          <button 
+          <button
             onClick={handleShareDuplicates}
             className="text-[12px] text-primary font-bold flex items-center gap-1.5 active:opacity-70 transition-opacity disabled:opacity-50"
             disabled={duplicates.length === 0}
@@ -216,7 +216,7 @@ export default function DuplicatesPage() {
           </button>
         )}
         {activeTab === 'faltan' && (
-          <button 
+          <button
             onClick={handleShareMissing}
             className="text-[12px] text-primary font-bold flex items-center gap-1.5 active:opacity-70 transition-opacity disabled:opacity-50"
             disabled={totalMissing === 0}
@@ -227,16 +227,16 @@ export default function DuplicatesPage() {
       </div>
 
       <div className="px-1 relative mb-2">
-        <input 
+        <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-card-light rounded-2xl p-3 pl-11 pr-4 text-[14px] text-text border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-inner" 
+          className="w-full bg-card-light rounded-2xl p-3 pl-11 pr-4 text-[14px] text-text border border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all shadow-inner"
           placeholder={`Buscar en ${activeTab === 'repetidas' ? 'repetidas' : 'faltantes'}...`}
         />
         <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-muted" size={18} />
       </div>
-      
+
       {activeTab === 'repetidas' ? (
         Object.keys(filteredDupsByTeam).length === 0 ? (
           <div className="glass-card p-12 text-center text-muted text-sm italic">
@@ -247,10 +247,10 @@ export default function DuplicatesPage() {
             {Object.keys(filteredDupsByTeam).map((teamCode) => {
               const teamDups = filteredDupsByTeam[teamCode];
               const isExpanded = expandedRepTeam === teamCode;
-              
+
               return (
-                <div 
-                  key={teamCode} 
+                <div
+                  key={teamCode}
                   style={{
                     border: '1px solid #262626',
                     borderRadius: '16px',
@@ -258,9 +258,9 @@ export default function DuplicatesPage() {
                     backgroundColor: '#161616',
                   }}
                 >
-                  <div 
+                  <div
                     className="flex justify-between items-center"
-                    style={{ 
+                    style={{
                       backgroundColor: '#1a1a1a',
                       padding: '14px 16px',
                       minHeight: '52px',
@@ -275,7 +275,7 @@ export default function DuplicatesPage() {
                       {teamCode}
                     </div>
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         style={{
                           backgroundColor: '#2a1a1a',
                           color: '#ff9800',
@@ -290,8 +290,8 @@ export default function DuplicatesPage() {
                         {teamDups.reduce((acc, dup) => acc + (dup.count - 1), 0)} REP
                       </div>
                       <span style={{ fontSize: '18px', opacity: 0.6 }}>{TEAM_FLAGS[teamCode]}</span>
-                      <ChevronDown 
-                        size={16} 
+                      <ChevronDown
+                        size={16}
                         style={{
                           transition: 'transform 0.3s ease',
                           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -300,13 +300,13 @@ export default function DuplicatesPage() {
                       />
                     </div>
                   </div>
-                  
+
                   {isExpanded && (
                     <div style={{ backgroundColor: '#1a1a1a' }}>
                       <div className="space-y-0">
                         {teamDups.map((dup, stickerIndex) => (
-                          <div 
-                            key={dup.code} 
+                          <div
+                            key={dup.code}
                             style={{
                               padding: '12px 16px',
                               borderBottom: stickerIndex === teamDups.length - 1 ? 'none' : '1px solid #262626'
@@ -317,7 +317,7 @@ export default function DuplicatesPage() {
                                 <Copy size={18} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div 
+                                <div
                                   className="font-semibold text-truncate"
                                   style={{
                                     fontSize: '15px',
@@ -331,7 +331,7 @@ export default function DuplicatesPage() {
                                 >
                                   {dup.code}
                                 </div>
-                                <div 
+                                <div
                                   style={{
                                     fontSize: '12px',
                                     color: '#8b8b8f',
@@ -344,7 +344,7 @@ export default function DuplicatesPage() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-3 shrink-0">
-                                <button 
+                                <button
                                   onClick={async (e) => {
                                     e.stopPropagation();
                                     await unregisterSticker(dup.code);
@@ -383,10 +383,10 @@ export default function DuplicatesPage() {
             {Object.keys(filteredMissingByTeam).map((teamCode) => {
               const missingStickers = filteredMissingByTeam[teamCode];
               const isExpanded = expandedMissTeam === teamCode;
-              
+
               return (
-                <div 
-                  key={teamCode} 
+                <div
+                  key={teamCode}
                   style={{
                     border: '1px solid #262626',
                     borderRadius: '16px',
@@ -394,9 +394,9 @@ export default function DuplicatesPage() {
                     backgroundColor: '#161616',
                   }}
                 >
-                  <div 
+                  <div
                     className="flex justify-between items-center"
-                    style={{ 
+                    style={{
                       backgroundColor: '#1a1a1a',
                       padding: '14px 16px',
                       minHeight: '52px',
@@ -411,7 +411,7 @@ export default function DuplicatesPage() {
                       {teamCode}
                     </div>
                     <div className="flex items-center gap-3">
-                      <div 
+                      <div
                         style={{
                           backgroundColor: '#1a1a1a',
                           color: '#8b8b8f',
@@ -426,8 +426,8 @@ export default function DuplicatesPage() {
                         {missingStickers.length} FALTAN
                       </div>
                       <span style={{ fontSize: '18px', opacity: 0.6 }}>{TEAM_FLAGS[teamCode]}</span>
-                      <ChevronDown 
-                        size={16} 
+                      <ChevronDown
+                        size={16}
                         style={{
                           transition: 'transform 0.3s ease',
                           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -436,20 +436,20 @@ export default function DuplicatesPage() {
                       />
                     </div>
                   </div>
-                  
+
                   {isExpanded && (
                     <div style={{ backgroundColor: '#1a1a1a' }}>
                       <div className="space-y-0">
                         {missingStickers.map((sticker, stickerIndex) => (
-                          <div 
-                            key={sticker.code} 
+                          <div
+                            key={sticker.code}
                             style={{
                               padding: '12px 16px',
                               borderBottom: stickerIndex === missingStickers.length - 1 ? 'none' : '1px solid #262626'
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <div 
+                              <div
                                 style={{
                                   width: '28px',
                                   height: '28px',
@@ -465,7 +465,7 @@ export default function DuplicatesPage() {
                                 <CircleDashed size={16} style={{ color: '#444' }} />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div 
+                                <div
                                   className="font-semibold"
                                   style={{
                                     fontSize: '15px',
@@ -479,7 +479,7 @@ export default function DuplicatesPage() {
                                 >
                                   {sticker.code}
                                 </div>
-                                <div 
+                                <div
                                   style={{
                                     fontSize: '12px',
                                     color: '#8b8b8f',
@@ -491,7 +491,7 @@ export default function DuplicatesPage() {
                                   {sticker.player}
                                 </div>
                               </div>
-                              <button 
+                              <button
                                 onClick={async (e) => {
                                   e.stopPropagation();
                                   try {
