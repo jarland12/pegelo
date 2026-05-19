@@ -6,7 +6,8 @@ export const TEAM_FLAGS = {
   MAR: "🇲🇦", MEX: "🇲🇽", MLI: "🇲🇱", NED: "🇳🇱", NGA: "🇳🇬", NOR: "🇳🇴",
   NZL: "🇳🇿", PAN: "🇵🇦", PER: "🇵🇪", POR: "🇵🇹", QAT: "🇶🇦", RSA: "🇿🇦",
   SAU: "🇸🇦", SEN: "🇸🇳", SRB: "🇷🇸", SUI: "🇨🇭", SVE: "🇸🇪", SWE: "🇸🇪", TUR: "🇹🇷",
-  UKR: "🇺🇦", URU: "🇺🇾", USA: "🇺🇸", UZB: "🇺🇿", VEN: "🇻🇪", CZE: "🇨🇿", FWC: "⚽"
+  UKR: "🇺🇦", URU: "🇺🇾", USA: "🇺🇸", UZB: "🇺🇿", VEN: "🇻🇪", CZE: "🇨🇿", FWC: "⚽",
+  SCO: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", PAR: "🇵🇾", CPV: "🇨🇻", CUW: "🇨🇼", HAI: "🇭🇹", KSA: "🇸🇦", TUN: "🇹🇳", JOR: "🇯🇴", CC: "🥤"
 };
 
 export const TEAM_NAMES = {
@@ -17,5 +18,6 @@ export const TEAM_NAMES = {
   MAR: "Marruecos", MEX: "México", MLI: "Malí", NED: "Países Bajos", NGA: "Nigeria", NOR: "Noruega",
   NZL: "Nueva Zelanda", PAN: "Panamá", PER: "Perú", POR: "Portugal", QAT: "Catar", RSA: "Sudáfrica",
   SAU: "Arabia Saudita", SEN: "Senegal", SRB: "Serbia", SUI: "Suiza", SVE: "Suecia", SWE: "Suecia", TUR: "Turquía",
-  UKR: "Ucrania", URU: "Uruguay", USA: "Estados Unidos", UZB: "Uzbekistán", VEN: "Venezuela", CZE: "República Checa", FWC: "Copa Mundial"
+  UKR: "Ucrania", URU: "Uruguay", USA: "Estados Unidos", UZB: "Uzbekistán", VEN: "Venezuela", CZE: "República Checa", FWC: "Copa Mundial",
+  SCO: "Escocia", PAR: "Paraguay", CPV: "Cabo Verde", CUW: "Curazao", HAI: "Haití", KSA: "Arabia Saudita", TUN: "Túnez", JOR: "Jordania", CC: "Coca-Cola"
 };
