@@ -141,7 +141,7 @@ export default function DuplicatesPage() {
           const flag = TEAM_FLAGS[teamCode] || '';
           text += `${flag} ${teamCode}\n`;
           byTeam[teamCode].forEach(dup => {
-            text += `${dup.code} ${dup.player} ×${dup.count - 1}\n`;
+            text += `${dup.code} ×${dup.count - 1}\n`;
           });
           text += '\n';
         }
@@ -168,7 +168,7 @@ export default function DuplicatesPage() {
           const flag = TEAM_FLAGS[teamCode] || '';
           text += `${flag} ${teamCode}\n`;
           missingByTeamObj[teamCode].forEach(sticker => {
-            text += `${sticker.code} ${sticker.player}\n`;
+            text += `${sticker.code}\n`;
           });
           text += '\n';
         }
